@@ -12,4 +12,4 @@ REST-CalculatorTests/
 
 #REST-Calculator/packages.config
 
-**/packages.config
+packages/
