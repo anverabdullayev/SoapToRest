@@ -4,4 +4,12 @@ REST-CalculatorTests/
 
 #REST-Calculator/bin
 
-REST-Calculator/bin/
+**/bin/
+
+#REST-Calculator/obj
+
+**/obj/
+
+#REST-Calculator/packages.config
+
+**/packages.config
