@@ -11,17 +11,19 @@ namespace REST_Calculator.Log
     public class Logger
     {
         string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Acer\source\repos\REST-Calculator\REST-Calculator\App_Data\DB.mdf;Integrated Security=True";
-        SqlConnection cnn;
+        //SqlConnection cnn;
 
         private List<CallDetails> sortedList;
-        private Queue<CallDetails> queue;
+        //private Queue<CallDetails> queue;
+        private static readonly object Instancelock = new object();
         private int currentCallId;
-        private static Logger instance;
+        private static Logger instance = null;
 
         public Logger()
         {
             sortedList = new List<CallDetails>();
-            string getCurrentIdQuery = "select isnull(max(id),0)+1 from dbo.Call";
+            //string getCurrentIdQuery = "select isnull(max(id),0)+1 from dbo.Call";
+            string getCurrentIdQuery = "SELECT IDENT_CURRENT('dbo.Call')+1";
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 sqlConnection.Open();
@@ -36,11 +38,14 @@ namespace REST_Calculator.Log
 
         public static Logger GetInstance()
         {
-            if (instance == null)
+            lock (Instancelock)
             {
-                instance = new Logger();
+                if (instance == null)
+                {
+                    instance = new Logger();
+                }
+                return instance;
             }
-            return instance;
         }
 
 
@@ -91,7 +96,7 @@ namespace REST_Calculator.Log
             if (sortedList.Count() == 0)
                 return;
 
-            CallDetails callDetails = PopFirstCurrentCall();
+            CallDetails callDetails = this.PopFirstCurrentCall();
             if (callDetails!=null)
             {
                 
@@ -117,7 +122,8 @@ namespace REST_Calculator.Log
         private CallDetails PopFirstCurrentCall()
         {
             CallDetails result = sortedList.Where(x => x.ParentID == currentCallId).OrderBy(x => (int)x.messageType).First();
-            if(result != null)
+
+            if (result != null)
             {
                 sortedList.Remove(result);
             }
